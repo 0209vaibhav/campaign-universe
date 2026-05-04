@@ -292,7 +292,10 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
     <div style={{
       position: 'absolute', inset: 0, animation: 'fadeIn 0.35s ease-out both',
       backgroundColor: '#111',
-      backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.022) 0.5px, transparent 0.5px), linear-gradient(-45deg, rgba(255,255,255,0.022) 0.5px, transparent 0.5px)',
+      backgroundImage: [
+        'repeating-linear-gradient(45deg, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 1px, transparent 1px, transparent 50%)',
+        'repeating-linear-gradient(-45deg, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 1px, transparent 1px, transparent 50%)',
+      ].join(', '),
       backgroundSize: '16px 16px',
     }}>
       <svg
