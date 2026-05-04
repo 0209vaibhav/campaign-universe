@@ -12,6 +12,7 @@ export default function Home() {
   const [campaign, setCampaign] = useState<Campaign>(seedCampaigns[0]);
   const [selectedNode, setSelectedNode] = useState<CampaignNode | null>(null);
   const [addNodeOpen, setAddNodeOpen] = useState(false);
+  const [editingNode, setEditingNode] = useState<CampaignNode | null>(null);
 
   function handleCampaignChange(c: Campaign) {
     setSelectedNode(null);
@@ -31,9 +32,10 @@ export default function Home() {
     setCampaign(prev => ({ ...prev, nodes: prev.nodes.filter(n => n.id !== id) }));
   }
 
-  function handleEditNode(updated: CampaignNode) {
+  function handleSaveEdit(updated: CampaignNode) {
     setCampaign(prev => ({ ...prev, nodes: prev.nodes.map(n => n.id === updated.id ? updated : n) }));
     setSelectedNode(updated);
+    setEditingNode(null);
   }
 
   return (
@@ -104,16 +106,17 @@ export default function Home() {
             node={selectedNode}
             onClose={() => setSelectedNode(null)}
             onDelete={handleDeleteNode}
-            onEdit={handleEditNode}
+            onEditClick={() => setEditingNode(selectedNode)}
           />
         )}
       </div>
 
-      {/* ── Add node modal ──────────────────────────────────── */}
-      {addNodeOpen && (
+      {/* ── Add / Edit node modal ───────────────────────────── */}
+      {(addNodeOpen || editingNode) && (
         <AddNodeModal
-          onAdd={handleAddNode}
-          onClose={() => setAddNodeOpen(false)}
+          initialNode={editingNode ?? undefined}
+          onAdd={editingNode ? handleSaveEdit : handleAddNode}
+          onClose={() => { setAddNodeOpen(false); setEditingNode(null); }}
         />
       )}
     </main>

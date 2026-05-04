@@ -18,6 +18,7 @@ const PLATFORMS = [
 interface Props {
   onAdd: (node: CampaignNode) => void;
   onClose: () => void;
+  initialNode?: CampaignNode; // when set, modal is in edit mode
 }
 
 const inputStyle: React.CSSProperties = {
@@ -67,19 +68,20 @@ const labelStyle: React.CSSProperties = {
   marginBottom: '6px',
 };
 
-export default function AddNodeModal({ onAdd, onClose }: Props) {
-  const [title, setTitle] = useState('');
-  const [platform, setPlatform] = useState(PLATFORMS[0]);
-  const [format, setFormat] = useState('');
-  const [duration, setDuration] = useState('');
-  const [description, setDescription] = useState('');
-  const [ring, setRing] = useState<Ring>(2);
+export default function AddNodeModal({ onAdd, onClose, initialNode }: Props) {
+  const isEdit = !!initialNode;
+  const [title, setTitle] = useState(initialNode?.title ?? '');
+  const [platform, setPlatform] = useState(initialNode?.platform ?? PLATFORMS[0]);
+  const [format, setFormat] = useState(initialNode?.format ?? '');
+  const [duration, setDuration] = useState(initialNode?.duration ?? '');
+  const [description, setDescription] = useState(initialNode?.description ?? '');
+  const [ring, setRing] = useState<Ring>(initialNode?.ring ?? 2);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) return;
     onAdd({
-      id: `node-${Date.now()}`,
+      id: isEdit ? initialNode!.id : `node-${Date.now()}`,
       type: 'satellite',
       title: title.trim(),
       platform,
@@ -133,7 +135,7 @@ export default function AddNodeModal({ onAdd, onClose }: Props) {
               color: '#BF4723',
             }}
           >
-            Add Node
+            {isEdit ? 'Edit Node' : 'Add Node'}
           </span>
           <button
             onClick={onClose}
@@ -257,7 +259,7 @@ export default function AddNodeModal({ onAdd, onClose }: Props) {
                 cursor: 'pointer',
               }}
             >
-              Add Node
+              {isEdit ? 'Save Changes' : 'Add Node'}
             </button>
           </div>
         </form>
