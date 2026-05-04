@@ -328,10 +328,10 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
         {/* Background handled by wrapper div CSS */}
 
         {/* Decorative depth rings */}
-        <circle cx={CX} cy={CY} r={70}  fill="none" stroke="rgba(255,255,255,0.018)" strokeWidth="1" strokeDasharray="2 14" />
-        <circle cx={CX} cy={CY} r={215} fill="none" stroke="rgba(255,255,255,0.02)"  strokeWidth="1" strokeDasharray="2 12" />
-        <circle cx={CX} cy={CY} r={355} fill="none" stroke="rgba(255,255,255,0.012)" strokeWidth="1" strokeDasharray="2 16" />
-        <circle cx={CX} cy={CY} r={420} fill="none" stroke="rgba(255,255,255,0.006)" strokeWidth="1" strokeDasharray="2 20" />
+        <circle cx={CX} cy={CY} r={70}  fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="2 14" />
+        <circle cx={CX} cy={CY} r={215} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="2 12" />
+        <circle cx={CX} cy={CY} r={355} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" strokeDasharray="2 16" />
+        <circle cx={CX} cy={CY} r={420} fill="none" stroke="rgba(255,255,255,0.02)" strokeWidth="1" strokeDasharray="2 20" />
         {/* Orbit track rings — Ring 1 and Ring 2 */}
         <circle cx={CX} cy={CY} r={R1}  fill="none" stroke="rgba(191,71,35,0.45)"   strokeWidth="1.2" strokeDasharray="3 7" />
         <circle cx={CX} cy={CY} r={R2}  fill="none" stroke="rgba(191,71,35,0.30)"   strokeWidth="1" strokeDasharray="3 9" />
@@ -484,7 +484,7 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
         <text
           x={W - 16} y={H - 14}
           textAnchor="end"
-          fill="#2A2A2A"
+          fill="#5A5A5A"
           fontSize="9"
           letterSpacing="2"
           style={{ fontFamily: "'Simpson', sans-serif" }}
@@ -499,11 +499,11 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
         display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4,
         pointerEvents: 'none',
       }}>
-        <span style={{ fontFamily: "'Simpson', sans-serif", fontSize: 7, letterSpacing: 2, color: '#2A2A2A' }}>
+        <span style={{ fontFamily: "'Simpson', sans-serif", fontSize: 7, letterSpacing: 2, color: '#5A5A5A' }}>
           ORBIT RINGS
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontFamily: "'Simpson', sans-serif", fontSize: 7.5, letterSpacing: 1.5, color: '#2A2A2A' }}>
+          <span style={{ fontFamily: "'Simpson', sans-serif", fontSize: 7.5, letterSpacing: 1.5, color: '#5A5A5A' }}>
             RING 1 — LAUNCH
           </span>
           <svg width={14} height={14} style={{ overflow: 'visible' }}>
@@ -511,7 +511,7 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           </svg>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontFamily: "'Simpson', sans-serif", fontSize: 7.5, letterSpacing: 1.5, color: '#2A2A2A' }}>
+          <span style={{ fontFamily: "'Simpson', sans-serif", fontSize: 7.5, letterSpacing: 1.5, color: '#5A5A5A' }}>
             RING 2 — EXTEND
           </span>
           <svg width={12} height={12} style={{ overflow: 'visible' }}>

@@ -23,13 +23,13 @@ export default function NodeDetailPanel({ node, onClose, onDelete }: Props) {
       <div
         style={{
           background: '#161616',
-          border: '1px solid #1E1E1E',
+          border: '1px solid #333',
         }}
       >
         {/* Header */}
         <div
           style={{
-            borderBottom: '1px solid #1E1E1E',
+            borderBottom: '1px solid #333',
             padding: '12px 14px',
             display: 'flex',
             alignItems: 'center',
@@ -75,9 +75,9 @@ export default function NodeDetailPanel({ node, onClose, onDelete }: Props) {
             display: 'grid',
             gridTemplateColumns: '1fr 1fr 1fr',
             gap: '1px',
-            background: '#1E1E1E',
-            borderTop: '1px solid #1E1E1E',
-            borderBottom: '1px solid #1E1E1E',
+            background: '#333',
+            borderTop: '1px solid #333',
+            borderBottom: '1px solid #333',
           }}
         >
           {[
@@ -125,7 +125,7 @@ export default function NodeDetailPanel({ node, onClose, onDelete }: Props) {
               style={{
                 width: '100%',
                 background: 'transparent',
-                border: '1px solid #2A2A2A',
+                border: '1px solid #444',
                 borderRadius: 0,
                 color: '#6B6B6B',
                 fontFamily: "'Simpson', sans-serif",

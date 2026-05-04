@@ -72,7 +72,7 @@ export default function InputPanel({ campaign, onCampaignChange, onAddNode }: Pr
             textTransform: 'uppercase',
             letterSpacing: '0.2em',
             fontSize: '8px',
-            color: '#3A3A3A',
+            color: '#5A5A5A',
             margin: '8px 0 0',
           }}
         >
@@ -204,7 +204,7 @@ export default function InputPanel({ campaign, onCampaignChange, onAddNode }: Pr
                     textTransform: 'uppercase',
                     letterSpacing: '0.12em',
                     fontSize: '8px',
-                    color: isActive ? '#BF4723' : '#3A3A3A',
+                    color: isActive ? '#BF4723' : '#5A5A5A',
                     transition: 'color 0.15s ease',
                   }}
                 >
@@ -265,7 +265,7 @@ export default function InputPanel({ campaign, onCampaignChange, onAddNode }: Pr
           style={{
             width: '100%',
             background: 'transparent',
-            border: '1px solid #2A2A2A',
+            border: '1px solid #444',
             borderRadius: 0,
             color: '#9A958C',
             fontFamily: "'Simpson', sans-serif",
