@@ -212,7 +212,7 @@ export function generateFromConcept(brand: string, concept: string): Campaign {
         platform: 'Broadcast + YouTube',
         format: ':60 Cinematic',
         duration: '60 sec',
-        description: `Hero campaign film for ${brand}. ${concept.slice(0, 80)}`,
+        description: `Hero campaign film for ${brand}. ${concept}`,
         ring: 1,
       },
       {
