@@ -311,15 +311,21 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
         {/* Background */}
         <rect width={W} height={H} fill="url(#xhatch)" />
 
-        {/* Orbital ring guides */}
-        <circle cx={CX} cy={CY} r={R1} fill="none" stroke="rgba(255,255,255,0.055)" strokeWidth="1" strokeDasharray="2 10" />
-        <circle cx={CX} cy={CY} r={R2} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" strokeDasharray="2 10" />
+        {/* Orbital ring guides — innermost to outermost, fading out */}
+        <circle cx={CX} cy={CY} r={70}  fill="none" stroke="rgba(255,255,255,0.018)" strokeWidth="1" strokeDasharray="2 14" />
+        <circle cx={CX} cy={CY} r={R1}  fill="none" stroke="rgba(255,255,255,0.05)"  strokeWidth="1" strokeDasharray="2 10" />
+        <circle cx={CX} cy={CY} r={215} fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="1" strokeDasharray="2 12" />
+        <circle cx={CX} cy={CY} r={R2}  fill="none" stroke="rgba(255,255,255,0.035)" strokeWidth="1" strokeDasharray="2 10" />
+        <circle cx={CX} cy={CY} r={355} fill="none" stroke="rgba(255,255,255,0.015)" strokeWidth="1" strokeDasharray="2 16" />
+        <circle cx={CX} cy={CY} r={420} fill="none" stroke="rgba(255,255,255,0.008)" strokeWidth="1" strokeDasharray="2 20" />
 
         {/* Connection lines — use live positions so lines follow dragged nodes */}
         {satellites.map((node, i) => {
           const heroPos = hero ? getPos(hero.id) : { x: CX, y: CY };
           const nodePos = getPos(node.id);
           const active = hoveredId === node.id || selectedNodeId === node.id;
+          const anySelected = selectedNodeId !== null;
+          const lineOpacity = active ? 0.55 : anySelected ? 0.07 : 0.22;
           return (
             <line
               key={`line-${node.id}`}
@@ -328,7 +334,7 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
               stroke="#BF4723"
               strokeWidth={active ? 1.5 : 0.8}
               strokeDasharray="4 9"
-              opacity={active ? 0.55 : 0.22}
+              opacity={lineOpacity}
               style={{
                 transition: 'opacity 0.2s ease',
                 animationName: 'lineAppear',
@@ -361,32 +367,47 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           const isSel = selectedNodeId === node.id;
           const isDrag = draggingId === node.id;
           const r = node.ring === 1 ? SAT1_R : SAT2_R;
+          const anySelected = selectedNodeId !== null;
+          const dimmed = anySelected && !isSel;
 
           return (
             <g key={node.id} transform={`translate(${pos.x} ${pos.y})`}>
-              <g
-                className="node-group"
-                style={{
-                  cursor: isDrag ? 'grabbing' : 'grab',
-                  ...animStyle(200 + i * 100),
-                }}
-                onPointerDown={e => handleNodePointerDown(e, node)}
-                onClick={() => handleNodeClick(node)}
-                onMouseEnter={() => setHoveredId(node.id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                <title>Click to view details · Drag to move</title>
-                {(isSel || isHov) && (
-                  <circle r={r + 13} fill="none" stroke="#BF4723" strokeWidth="1" opacity={isSel ? 0.35 : 0.2} />
-                )}
-                <circle
-                  r={r}
-                  fill={isSel ? 'rgba(191,71,35,0.18)' : isDrag ? 'rgba(191,71,35,0.12)' : '#161616'}
-                  stroke="#BF4723"
-                  strokeWidth={isSel || isDrag ? 1.5 : node.ring === 1 ? 1.2 : 1}
-                  filter={isHov ? 'url(#softGlow)' : undefined}
-                  style={{ transition: 'fill 0.15s ease' }}
-                />
+              {/* State layer: scale + opacity — isolated from entry animation */}
+              <g style={{
+                transform: isSel ? 'scale(1.1)' : 'scale(1)',
+                transition: 'transform 0.2s ease, opacity 0.2s ease',
+                transformBox: 'fill-box' as React.CSSProperties['transformBox'],
+                transformOrigin: 'center',
+                opacity: dimmed ? 0.4 : 1,
+              }}>
+                <g
+                  className="node-group"
+                  style={{
+                    cursor: isDrag ? 'grabbing' : 'grab',
+                    ...animStyle(200 + i * 100),
+                  }}
+                  onPointerDown={e => handleNodePointerDown(e, node)}
+                  onClick={() => handleNodeClick(node)}
+                  onMouseEnter={() => setHoveredId(node.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  <title>Click to view details · Drag to move</title>
+                  {/* Solid selection ring */}
+                  {isSel && (
+                    <circle r={r + 9} fill="none" stroke="#BF4723" strokeWidth="2.5" opacity="1" />
+                  )}
+                  {/* Subtle hover ring */}
+                  {isHov && !isSel && (
+                    <circle r={r + 9} fill="none" stroke="#BF4723" strokeWidth="1" opacity="0.3" />
+                  )}
+                  <circle
+                    r={r}
+                    fill={isSel ? 'rgba(191,71,35,0.2)' : isDrag ? 'rgba(191,71,35,0.12)' : '#161616'}
+                    stroke="#BF4723"
+                    strokeWidth={isSel ? 2.5 : isDrag ? 1.5 : node.ring === 1 ? 1.2 : 1}
+                    filter={isHov && !isSel ? 'url(#softGlow)' : undefined}
+                    style={{ transition: 'fill 0.2s ease, stroke-width 0.2s ease' }}
+                  />
                 <text
                   textAnchor="middle"
                   dominantBaseline="middle"
@@ -435,6 +456,7 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
                     </>
                   );
                 })()}
+                </g>
               </g>
             </g>
           );
