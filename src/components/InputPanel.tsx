@@ -22,6 +22,7 @@ const inputStyle: React.CSSProperties = {
   padding: '9px 11px',
   outline: 'none',
   resize: 'none',
+  scrollbarWidth: 'none',
 };
 
 const dividerStyle: React.CSSProperties = {
