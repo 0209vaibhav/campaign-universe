@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { Campaign, CampaignNode } from '@/lib/types';
 
-/* ── SVG viewport constants ────────────────────────────────── */
+/* ── SVG viewport constants ──────────────────────────────────── */
 const W = 900;
 const H = 680;
 const CX = W / 2;   // 450
@@ -22,7 +22,7 @@ const PLATFORM_ABBREV: Record<string, string> = {
   'Spotify + Apple Podcasts': 'POD',
   'Apple Podcasts': 'AP',
   'Broadcast': 'TV',
-  'Broadcast + YouTube': 'YT',
+  'Broadcast + YouTube': 'TV',
   'Live Event': '◆',
   'Twitter/X': 'X',
   'YouTube + Twitch': 'LIVE',
@@ -66,7 +66,23 @@ function getPositions(nodes: CampaignNode[]): Record<string, { x: number; y: num
   return pos;
 }
 
-/* ── Sub-components ────────────────────────────────────────── */
+/* ── Animation style helper ──────────────────────────────────── */
+/*
+ * CSS transform on a <g> overrides the SVG `transform` attribute.
+ * Fix: outer <g> handles SVG positioning, inner <g> handles CSS animation.
+ * The inner group scales from its own center (transform-box:fill-box).
+ */
+function animStyle(delay: number): React.CSSProperties {
+  return {
+    animationName: 'nodeAppear',
+    animationDuration: '0.5s',
+    animationTimingFunction: 'ease-out',
+    animationDelay: `${delay}ms`,
+    animationFillMode: 'both',
+  };
+}
+
+/* ── Hero node sub-component ─────────────────────────────────── */
 
 interface HeroNodeProps {
   node: CampaignNode;
@@ -78,75 +94,71 @@ interface HeroNodeProps {
 
 function HeroNode({ node, pos, isActive, onClickNode, onHover }: HeroNodeProps) {
   return (
-    <g
-      transform={`translate(${pos.x} ${pos.y})`}
-      className="node-group"
-      style={{
-        cursor: 'pointer',
-        animationName: 'nodeAppear',
-        animationDuration: '0.6s',
-        animationTimingFunction: 'ease-out',
-        animationDelay: '0ms',
-        animationFillMode: 'both',
-      }}
-      onClick={() => onClickNode(node)}
-      onMouseEnter={() => onHover(node.id)}
-      onMouseLeave={() => onHover(null)}
-    >
-      {/* Ambient glow */}
-      <circle
-        r={HERO_R + 6}
-        fill="#BF4723"
-        opacity={isActive ? 0.22 : 0.1}
-        filter="url(#heroAmbient)"
-        style={{ transition: 'opacity 0.25s ease' }}
-      />
-      {/* Pulse ring when selected */}
-      {isActive && (
+    /* Outer <g>: SVG positioning only — no CSS animation here */
+    <g transform={`translate(${pos.x} ${pos.y})`}>
+      {/* Inner <g>: CSS scale animation only — transform-box:fill-box keeps origin centered */}
+      <g
+        className="node-group"
+        style={{ cursor: 'pointer', ...animStyle(0) }}
+        onClick={() => onClickNode(node)}
+        onMouseEnter={() => onHover(node.id)}
+        onMouseLeave={() => onHover(null)}
+      >
+        {/* Ambient glow disc */}
         <circle
-          r={HERO_R + 18}
-          fill="none"
-          stroke="#BF4723"
-          strokeWidth="1"
-          opacity="0.3"
-          style={{ animation: 'pulseRing 2s ease-in-out infinite' }}
+          r={HERO_R + 6}
+          fill="#BF4723"
+          opacity={isActive ? 0.22 : 0.1}
+          filter="url(#heroAmbient)"
+          style={{ transition: 'opacity 0.25s ease' }}
         />
-      )}
-      {/* Main fill */}
-      <circle
-        r={HERO_R}
-        fill="#BF4723"
-        filter={isActive ? 'url(#softGlow)' : undefined}
-        style={{ transition: 'filter 0.2s ease' }}
-      />
-      {/* Play triangle */}
-      <polygon points="-9,-12 18,0 -9,12" fill="rgba(255,255,255,0.88)" />
-      {/* Title */}
-      <text
-        y={HERO_R + 20}
-        textAnchor="middle"
-        fill="#F2EFE8"
-        fontSize="11"
-        style={{ fontFamily: "'ABC Camera Medium', sans-serif" }}
-      >
-        {trunc(node.title, 18)}
-      </text>
-      {/* Format label */}
-      <text
-        y={HERO_R + 33}
-        textAnchor="middle"
-        fill="#9A958C"
-        fontSize="8"
-        letterSpacing="1.8"
-        style={{ fontFamily: "'Simpson', sans-serif" }}
-      >
-        {node.format.toUpperCase()}
-      </text>
+        {/* Pulse ring when active */}
+        {isActive && (
+          <circle
+            r={HERO_R + 18}
+            fill="none"
+            stroke="#BF4723"
+            strokeWidth="1"
+            opacity="0.3"
+            style={{ animation: 'pulseRing 2s ease-in-out infinite' }}
+          />
+        )}
+        {/* Main filled circle */}
+        <circle
+          r={HERO_R}
+          fill="#BF4723"
+          filter={isActive ? 'url(#softGlow)' : undefined}
+          style={{ transition: 'filter 0.2s ease' }}
+        />
+        {/* Play triangle */}
+        <polygon points="-9,-12 18,0 -9,12" fill="rgba(255,255,255,0.88)" />
+        {/* Title */}
+        <text
+          y={HERO_R + 20}
+          textAnchor="middle"
+          fill="#F2EFE8"
+          fontSize="11"
+          style={{ fontFamily: "'ABC Camera Medium', sans-serif" }}
+        >
+          {trunc(node.title, 18)}
+        </text>
+        {/* Format label */}
+        <text
+          y={HERO_R + 33}
+          textAnchor="middle"
+          fill="#9A958C"
+          fontSize="8"
+          letterSpacing="1.8"
+          style={{ fontFamily: "'Simpson', sans-serif" }}
+        >
+          {node.format.toUpperCase()}
+        </text>
+      </g>
     </g>
   );
 }
 
-/* ── Main component ────────────────────────────────────────── */
+/* ── Main component ──────────────────────────────────────────── */
 
 interface Props {
   campaign: Campaign;
@@ -159,31 +171,31 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
 
   const positions = getPositions(campaign.nodes);
   const hero = campaign.nodes.find(n => n.type === 'hero') ?? null;
-  const heroPos = hero ? positions[hero.id] ?? null : null;
+  const heroPos = hero ? (positions[hero.id] ?? null) : null;
   const satellites = campaign.nodes.filter(n => n.type === 'satellite');
 
   return (
-    /* key on wrapper so animations replay when campaign switches */
     <div
-      key={campaign.id}
-      className="w-full h-full"
-      style={{ animation: 'fadeIn 0.4s ease-out both' }}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        animation: 'fadeIn 0.35s ease-out both',
+      }}
     >
       <svg
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
         height="100%"
         preserveAspectRatio="xMidYMid meet"
-        style={{ overflow: 'visible' }}
       >
         <defs>
-          {/* Crosshatch pattern */}
+          {/* Crosshatch fill pattern */}
           <pattern id="xhatch" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
             <path d="M 0 0 L 16 16" stroke="rgba(255,255,255,0.022)" strokeWidth="0.5" fill="none" />
             <path d="M 16 0 L 0 16" stroke="rgba(255,255,255,0.022)" strokeWidth="0.5" fill="none" />
           </pattern>
 
-          {/* Soft glow for hover */}
+          {/* Soft hover glow */}
           <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
             <feMerge>
@@ -202,7 +214,7 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           </filter>
         </defs>
 
-        {/* ── Background ─────────────────────────────────────── */}
+        {/* ── Background texture ──────────────────────────────── */}
         <rect width={W} height={H} fill="url(#xhatch)" />
 
         {/* ── Orbital ring guides ─────────────────────────────── */}
@@ -221,7 +233,7 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           strokeDasharray="2 10"
         />
 
-        {/* ── Connection lines (behind nodes) ─────────────────── */}
+        {/* ── Connection lines ────────────────────────────────── */}
         {satellites.map((node, i) => {
           const pos = positions[node.id];
           if (!pos) return null;
@@ -238,9 +250,9 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
               style={{
                 transition: 'opacity 0.2s ease, stroke-width 0.2s ease',
                 animationName: 'lineAppear',
-                animationDuration: '0.6s',
+                animationDuration: '0.5s',
                 animationTimingFunction: 'ease-out',
-                animationDelay: `${120 + i * 80}ms`,
+                animationDelay: `${100 + i * 70}ms`,
                 animationFillMode: 'both',
               }}
             />
@@ -265,81 +277,76 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           const isHov = hoveredId === node.id;
           const isSel = selectedNodeId === node.id;
           const r = node.ring === 1 ? SAT1_R : SAT2_R;
-          const delay = 180 + i * 100;
+          const delay = 200 + i * 100;
 
           return (
-            <g
-              key={node.id}
-              transform={`translate(${pos.x} ${pos.y})`}
-              className="node-group"
-              style={{
-                cursor: 'pointer',
-                animationName: 'nodeAppear',
-                animationDuration: '0.5s',
-                animationTimingFunction: 'ease-out',
-                animationDelay: `${delay}ms`,
-                animationFillMode: 'both',
-              }}
-              onClick={() => onNodeClick(node)}
-              onMouseEnter={() => setHoveredId(node.id)}
-              onMouseLeave={() => setHoveredId(null)}
-            >
-              {/* Hover / selected halo */}
-              {(isSel || isHov) && (
+            /* Outer <g>: SVG positioning — no CSS animation */
+            <g key={node.id} transform={`translate(${pos.x} ${pos.y})`}>
+              {/* Inner <g>: CSS scale animation only */}
+              <g
+                className="node-group"
+                style={{ cursor: 'pointer', ...animStyle(delay) }}
+                onClick={() => onNodeClick(node)}
+                onMouseEnter={() => setHoveredId(node.id)}
+                onMouseLeave={() => setHoveredId(null)}
+              >
+                {/* Hover / selected halo */}
+                {(isSel || isHov) && (
+                  <circle
+                    r={r + 13}
+                    fill="none"
+                    stroke="#BF4723"
+                    strokeWidth="1"
+                    opacity={isSel ? 0.35 : 0.2}
+                  />
+                )}
+                {/* Main satellite circle */}
                 <circle
-                  r={r + 13}
-                  fill="none"
+                  r={r}
+                  fill={isSel ? 'rgba(191,71,35,0.18)' : '#161616'}
                   stroke="#BF4723"
-                  strokeWidth="1"
-                  opacity={isSel ? 0.35 : 0.2}
+                  strokeWidth={isSel ? 1.5 : node.ring === 1 ? 1.2 : 1}
+                  filter={isHov ? 'url(#softGlow)' : undefined}
+                  style={{ transition: 'fill 0.2s ease' }}
                 />
-              )}
-              {/* Main satellite circle */}
-              <circle
-                r={r}
-                fill={isSel ? 'rgba(191,71,35,0.18)' : '#161616'}
-                stroke="#BF4723"
-                strokeWidth={isSel ? 1.5 : node.ring === 1 ? 1.2 : 1}
-                filter={isHov ? 'url(#softGlow)' : undefined}
-                style={{ transition: 'fill 0.2s ease, filter 0.2s ease' }}
-              />
-              {/* Platform abbreviation */}
-              <text
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fill={isSel ? '#F2EFE8' : '#BF4723'}
-                fontSize={node.ring === 1 ? 8 : 7}
-                letterSpacing="1"
-                style={{ fontFamily: "'Simpson', sans-serif", transition: 'fill 0.2s ease' }}
-              >
-                {abbrev(node.platform)}
-              </text>
-              {/* Node title */}
-              <text
-                y={r + 17}
-                textAnchor="middle"
-                fill="#F2EFE8"
-                fontSize="10"
-                style={{ fontFamily: "'ABC Camera Medium', sans-serif" }}
-              >
-                {trunc(node.title, 14)}
-              </text>
-              {/* Format label */}
-              <text
-                y={r + 29}
-                textAnchor="middle"
-                fill="#6B6B6B"
-                fontSize="7.5"
-                letterSpacing="1"
-                style={{ fontFamily: "'Simpson', sans-serif" }}
-              >
-                {node.format.toUpperCase()}
-              </text>
+                {/* Platform abbreviation */}
+                <text
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill={isSel ? '#F2EFE8' : '#BF4723'}
+                  fontSize={node.ring === 1 ? 8 : 7}
+                  letterSpacing="1"
+                  style={{ fontFamily: "'Simpson', sans-serif" }}
+                >
+                  {abbrev(node.platform)}
+                </text>
+                {/* Node title */}
+                <text
+                  y={r + 17}
+                  textAnchor="middle"
+                  fill="#F2EFE8"
+                  fontSize="10"
+                  style={{ fontFamily: "'ABC Camera Medium', sans-serif" }}
+                >
+                  {trunc(node.title, 14)}
+                </text>
+                {/* Format label */}
+                <text
+                  y={r + 29}
+                  textAnchor="middle"
+                  fill="#6B6B6B"
+                  fontSize="7.5"
+                  letterSpacing="1"
+                  style={{ fontFamily: "'Simpson', sans-serif" }}
+                >
+                  {node.format.toUpperCase()}
+                </text>
+              </g>
             </g>
           );
         })}
 
-        {/* ── Canvas label: node count ─────────────────────────── */}
+        {/* ── Canvas label ─────────────────────────────────────── */}
         <text
           x={W - 16}
           y={H - 14}
