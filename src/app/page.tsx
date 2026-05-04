@@ -31,6 +31,11 @@ export default function Home() {
     setCampaign(prev => ({ ...prev, nodes: prev.nodes.filter(n => n.id !== id) }));
   }
 
+  function handleEditNode(updated: CampaignNode) {
+    setCampaign(prev => ({ ...prev, nodes: prev.nodes.map(n => n.id === updated.id ? updated : n) }));
+    setSelectedNode(updated);
+  }
+
   return (
     <main
       style={{
@@ -99,6 +104,7 @@ export default function Home() {
             node={selectedNode}
             onClose={() => setSelectedNode(null)}
             onDelete={handleDeleteNode}
+            onEdit={handleEditNode}
           />
         )}
       </div>
