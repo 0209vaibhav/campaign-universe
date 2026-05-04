@@ -482,8 +482,8 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
 
         {/* Canvas label */}
         <text
-          x={W - 16} y={H - 14}
-          textAnchor="end"
+          x={16} y={H - 14}
+          textAnchor="start"
           fill="#5A5A5A"
           fontSize="9"
           letterSpacing="2"
