@@ -38,6 +38,22 @@ function trunc(s: string, n: number): string {
   return s.length > n ? s.slice(0, n - 1) + '…' : s;
 }
 
+// Split a title into at most two lines at a word boundary (~11 chars per line)
+function splitTitle(title: string): [string, string] {
+  if (title.length <= 12) return [title, ''];
+  const words = title.split(' ');
+  let line1 = '';
+  for (const word of words) {
+    const next = line1 ? line1 + ' ' + word : word;
+    if (next.length > 11) break;
+    line1 = next;
+  }
+  // If we couldn't split at all (one very long word), just use the whole title
+  if (!line1) return [trunc(title, 13), ''];
+  const line2 = title.slice(line1.length).trim();
+  return [line1, trunc(line2, 13)];
+}
+
 function getBasePositions(nodes: CampaignNode[]): Record<string, { x: number; y: number }> {
   const pos: Record<string, { x: number; y: number }> = {};
   const hero = nodes.find(n => n.type === 'hero');
@@ -362,25 +378,44 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
                 >
                   {abbrev(node.platform)}
                 </text>
-                <text
-                  y={r + 17}
-                  textAnchor="middle"
-                  fill="#F2EFE8"
-                  fontSize="10"
-                  style={{ fontFamily: "'ABC Camera Medium', sans-serif" }}
-                >
-                  {trunc(node.title, 14)}
-                </text>
-                <text
-                  y={r + 29}
-                  textAnchor="middle"
-                  fill="#6B6B6B"
-                  fontSize="7.5"
-                  letterSpacing="1"
-                  style={{ fontFamily: "'Simpson', sans-serif" }}
-                >
-                  {node.format.toUpperCase()}
-                </text>
+                {(() => {
+                  const [l1, l2] = splitTitle(node.title);
+                  const formatY = l2 ? r + 42 : r + 29;
+                  return (
+                    <>
+                      <text
+                        y={r + 17}
+                        textAnchor="middle"
+                        fill="#F2EFE8"
+                        fontSize="10"
+                        style={{ fontFamily: "'ABC Camera Medium', sans-serif" }}
+                      >
+                        {l1}
+                      </text>
+                      {l2 && (
+                        <text
+                          y={r + 29}
+                          textAnchor="middle"
+                          fill="#F2EFE8"
+                          fontSize="10"
+                          style={{ fontFamily: "'ABC Camera Medium', sans-serif" }}
+                        >
+                          {l2}
+                        </text>
+                      )}
+                      <text
+                        y={formatY}
+                        textAnchor="middle"
+                        fill="#6B6B6B"
+                        fontSize="7.5"
+                        letterSpacing="1"
+                        style={{ fontFamily: "'Simpson', sans-serif" }}
+                      >
+                        {node.format.toUpperCase()}
+                      </text>
+                    </>
+                  );
+                })()}
               </g>
             </g>
           );

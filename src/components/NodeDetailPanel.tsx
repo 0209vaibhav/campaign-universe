@@ -100,7 +100,10 @@ export default function NodeDetailPanel({ node, onClose, onDelete }: Props) {
         </div>
 
         {/* Description */}
-        <div style={{ padding: '12px 14px 10px' }}>
+        <div
+          className="no-scrollbar"
+          style={{ padding: '12px 14px 10px', maxHeight: '96px', overflowY: 'auto' }}
+        >
           <p
             className="font-body"
             style={{
