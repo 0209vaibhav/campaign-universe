@@ -477,23 +477,22 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           );
         })}
 
-        {/* Legend — top-left */}
-        <g transform="translate(20, 20)">
-          <text fill="#2A2A2A" fontSize="7" letterSpacing="2" style={{ fontFamily: "'Simpson', sans-serif" }}>
+        {/* Legend — top-right */}
+        <g transform={`translate(${W - 16}, 20)`}>
+          <text textAnchor="end" fill="#2A2A2A" fontSize="7" letterSpacing="2" style={{ fontFamily: "'Simpson', sans-serif" }}>
             ORBIT RINGS
           </text>
           <g transform="translate(0, 16)">
-            <circle r={6} fill="#161616" stroke="#BF4723" strokeWidth="1.2" />
-            <circle r={2.5} fill="#BF4723" opacity="0.65" />
-            <text x={14} dominantBaseline="middle" fill="#2A2A2A" fontSize="7.5" letterSpacing="1.5" style={{ fontFamily: "'Simpson', sans-serif" }}>
+            <text x={-14} textAnchor="end" dominantBaseline="middle" fill="#2A2A2A" fontSize="7.5" letterSpacing="1.5" style={{ fontFamily: "'Simpson', sans-serif" }}>
               RING 1 — LAUNCH
             </text>
+            <circle r={6} fill="#161616" stroke="#BF4723" strokeWidth="1.2" />
           </g>
           <g transform="translate(0, 32)">
-            <circle r={5} fill="#161616" stroke="rgba(191,71,35,0.55)" strokeWidth="1" strokeDasharray="2 3" />
-            <text x={14} dominantBaseline="middle" fill="#2A2A2A" fontSize="7.5" letterSpacing="1.5" style={{ fontFamily: "'Simpson', sans-serif" }}>
+            <text x={-14} textAnchor="end" dominantBaseline="middle" fill="#2A2A2A" fontSize="7.5" letterSpacing="1.5" style={{ fontFamily: "'Simpson', sans-serif" }}>
               RING 2 — EXTEND
             </text>
+            <circle r={5} fill="#161616" stroke="rgba(191,71,35,0.55)" strokeWidth="1" strokeDasharray="2 3" />
           </g>
         </g>
 
