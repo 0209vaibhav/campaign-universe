@@ -477,25 +477,6 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           );
         })}
 
-        {/* Legend — top-right */}
-        <g transform={`translate(${W - 16}, 20)`}>
-          <text textAnchor="end" fill="#2A2A2A" fontSize="7" letterSpacing="2" style={{ fontFamily: "'Simpson', sans-serif" }}>
-            ORBIT RINGS
-          </text>
-          <g transform="translate(0, 16)">
-            <text x={-14} textAnchor="end" dominantBaseline="middle" fill="#2A2A2A" fontSize="7.5" letterSpacing="1.5" style={{ fontFamily: "'Simpson', sans-serif" }}>
-              RING 1 — LAUNCH
-            </text>
-            <circle r={6} fill="#161616" stroke="#BF4723" strokeWidth="1.2" />
-          </g>
-          <g transform="translate(0, 32)">
-            <text x={-14} textAnchor="end" dominantBaseline="middle" fill="#2A2A2A" fontSize="7.5" letterSpacing="1.5" style={{ fontFamily: "'Simpson', sans-serif" }}>
-              RING 2 — EXTEND
-            </text>
-            <circle r={5} fill="#161616" stroke="rgba(191,71,35,0.55)" strokeWidth="1" strokeDasharray="2 3" />
-          </g>
-        </g>
-
         {/* Canvas label */}
         <text
           x={W - 16} y={H - 14}
@@ -508,6 +489,33 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           {satellites.length} EXTENSIONS
         </text>
       </svg>
+
+      {/* Legend — HTML overlay, always flush to container top-right */}
+      <div style={{
+        position: 'absolute', top: 16, right: 16,
+        display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4,
+        pointerEvents: 'none',
+      }}>
+        <span style={{ fontFamily: "'Simpson', sans-serif", fontSize: 7, letterSpacing: 2, color: '#2A2A2A' }}>
+          ORBIT RINGS
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontFamily: "'Simpson', sans-serif", fontSize: 7.5, letterSpacing: 1.5, color: '#2A2A2A' }}>
+            RING 1 — LAUNCH
+          </span>
+          <svg width={14} height={14} style={{ overflow: 'visible' }}>
+            <circle cx={7} cy={7} r={6} fill="#161616" stroke="#BF4723" strokeWidth="1.2" />
+          </svg>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontFamily: "'Simpson', sans-serif", fontSize: 7.5, letterSpacing: 1.5, color: '#2A2A2A' }}>
+            RING 2 — EXTEND
+          </span>
+          <svg width={12} height={12} style={{ overflow: 'visible' }}>
+            <circle cx={6} cy={6} r={5} fill="#161616" stroke="rgba(191,71,35,0.55)" strokeWidth="1" strokeDasharray="2 3" />
+          </svg>
+        </div>
+      </div>
     </div>
   );
 }
