@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { Campaign, CampaignNode } from '@/lib/types';
 
 /* ── SVG viewport constants ──────────────────────────────────── */
 const W = 900;
 const H = 680;
-const CX = W / 2;   // 450
-const CY = H / 2;   // 340
-const R1 = 158;     // inner orbital radius
-const R2 = 272;     // outer orbital radius
+const CX = W / 2;
+const CY = H / 2;
+const R1 = 158;
+const R2 = 272;
 const HERO_R = 50;
 const SAT1_R = 28;
 const SAT2_R = 24;
@@ -23,7 +23,7 @@ const PLATFORM_ABBREV: Record<string, string> = {
   'Apple Podcasts': 'AP',
   'Broadcast': 'TV',
   'Broadcast + YouTube': 'TV',
-  'Live Event': '◆',
+  'Live Event': 'LV',
   'Twitter/X': 'X',
   'YouTube + Twitch': 'LIVE',
   'Press': 'PR',
@@ -38,7 +38,7 @@ function trunc(s: string, n: number): string {
   return s.length > n ? s.slice(0, n - 1) + '…' : s;
 }
 
-function getPositions(nodes: CampaignNode[]): Record<string, { x: number; y: number }> {
+function getBasePositions(nodes: CampaignNode[]): Record<string, { x: number; y: number }> {
   const pos: Record<string, { x: number; y: number }> = {};
   const hero = nodes.find(n => n.type === 'hero');
   const ring1 = nodes.filter(n => n.type === 'satellite' && n.ring === 1);
@@ -66,12 +66,6 @@ function getPositions(nodes: CampaignNode[]): Record<string, { x: number; y: num
   return pos;
 }
 
-/* ── Animation style helper ──────────────────────────────────── */
-/*
- * CSS transform on a <g> overrides the SVG `transform` attribute.
- * Fix: outer <g> handles SVG positioning, inner <g> handles CSS animation.
- * The inner group scales from its own center (transform-box:fill-box).
- */
 function animStyle(delay: number): React.CSSProperties {
   return {
     animationName: 'nodeAppear',
@@ -82,29 +76,33 @@ function animStyle(delay: number): React.CSSProperties {
   };
 }
 
-/* ── Hero node sub-component ─────────────────────────────────── */
+/* ── Hero node ───────────────────────────────────────────────── */
 
 interface HeroNodeProps {
   node: CampaignNode;
   pos: { x: number; y: number };
   isActive: boolean;
+  isDragging: boolean;
+  onPointerDown: (e: React.PointerEvent) => void;
   onClickNode: (n: CampaignNode) => void;
   onHover: (id: string | null) => void;
 }
 
-function HeroNode({ node, pos, isActive, onClickNode, onHover }: HeroNodeProps) {
+function HeroNode({ node, pos, isActive, isDragging, onPointerDown, onClickNode, onHover }: HeroNodeProps) {
   return (
-    /* Outer <g>: SVG positioning only — no CSS animation here */
     <g transform={`translate(${pos.x} ${pos.y})`}>
-      {/* Inner <g>: CSS scale animation only — transform-box:fill-box keeps origin centered */}
       <g
         className="node-group"
-        style={{ cursor: 'pointer', ...animStyle(0) }}
+        style={{
+          cursor: isDragging ? 'grabbing' : 'grab',
+          ...animStyle(0),
+        }}
+        onPointerDown={onPointerDown}
         onClick={() => onClickNode(node)}
         onMouseEnter={() => onHover(node.id)}
         onMouseLeave={() => onHover(null)}
       >
-        {/* Ambient glow disc */}
+        <title>Click to view details · Drag to move</title>
         <circle
           r={HERO_R + 6}
           fill="#BF4723"
@@ -112,7 +110,6 @@ function HeroNode({ node, pos, isActive, onClickNode, onHover }: HeroNodeProps) 
           filter="url(#heroAmbient)"
           style={{ transition: 'opacity 0.25s ease' }}
         />
-        {/* Pulse ring when active */}
         {isActive && (
           <circle
             r={HERO_R + 18}
@@ -123,16 +120,13 @@ function HeroNode({ node, pos, isActive, onClickNode, onHover }: HeroNodeProps) 
             style={{ animation: 'pulseRing 2s ease-in-out infinite' }}
           />
         )}
-        {/* Main filled circle */}
         <circle
           r={HERO_R}
           fill="#BF4723"
           filter={isActive ? 'url(#softGlow)' : undefined}
           style={{ transition: 'filter 0.2s ease' }}
         />
-        {/* Play triangle */}
         <polygon points="-9,-12 18,0 -9,12" fill="rgba(255,255,255,0.88)" />
-        {/* Title */}
         <text
           y={HERO_R + 20}
           textAnchor="middle"
@@ -142,7 +136,6 @@ function HeroNode({ node, pos, isActive, onClickNode, onHover }: HeroNodeProps) 
         >
           {trunc(node.title, 18)}
         </text>
-        {/* Format label */}
         <text
           y={HERO_R + 33}
           textAnchor="middle"
@@ -168,34 +161,102 @@ interface Props {
 
 export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [manualPositions, setManualPositions] = useState<Record<string, { x: number; y: number }>>({});
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  const positions = getPositions(campaign.nodes);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const dragRef = useRef<{
+    id: string;
+    ox: number; oy: number;
+    mx: number; my: number;
+  } | null>(null);
+  const wasDragRef = useRef(false);
+
+  /* ── Cancel drag if pointer leaves window ─────────────────── */
+  useEffect(() => {
+    const cancel = () => {
+      dragRef.current = null;
+      setDraggingId(null);
+    };
+    window.addEventListener('pointerup', cancel);
+    return () => window.removeEventListener('pointerup', cancel);
+  }, []);
+
+  const basePositions = getBasePositions(campaign.nodes);
+
+  function getPos(id: string) {
+    return manualPositions[id] ?? basePositions[id] ?? { x: CX, y: CY };
+  }
+
+  function toSvgCoords(clientX: number, clientY: number) {
+    const svg = svgRef.current;
+    if (!svg) return null;
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return null;
+    return pt.matrixTransform(ctm.inverse());
+  }
+
+  function handleNodePointerDown(e: React.PointerEvent, node: CampaignNode) {
+    e.preventDefault();
+    e.stopPropagation();
+    wasDragRef.current = false;
+    const pt = toSvgCoords(e.clientX, e.clientY);
+    if (!pt) return;
+    const pos = getPos(node.id);
+    dragRef.current = { id: node.id, ox: pos.x, oy: pos.y, mx: pt.x, my: pt.y };
+  }
+
+  function handleSvgPointerMove(e: React.PointerEvent) {
+    if (!dragRef.current) return;
+    const pt = toSvgCoords(e.clientX, e.clientY);
+    if (!pt) return;
+    const dx = pt.x - dragRef.current.mx;
+    const dy = pt.y - dragRef.current.my;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+      wasDragRef.current = true;
+      setDraggingId(dragRef.current.id);
+    }
+    if (!wasDragRef.current) return;
+    const { id, ox, oy } = dragRef.current;
+    setManualPositions(prev => ({ ...prev, [id]: { x: ox + dx, y: oy + dy } }));
+  }
+
+  function handleSvgPointerUp() {
+    dragRef.current = null;
+    setDraggingId(null);
+  }
+
+  function handleNodeClick(node: CampaignNode) {
+    if (wasDragRef.current) {
+      wasDragRef.current = false;
+      return;
+    }
+    onNodeClick(node);
+  }
+
   const hero = campaign.nodes.find(n => n.type === 'hero') ?? null;
-  const heroPos = hero ? (positions[hero.id] ?? null) : null;
   const satellites = campaign.nodes.filter(n => n.type === 'satellite');
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        animation: 'fadeIn 0.35s ease-out both',
-      }}
-    >
+    <div style={{ position: 'absolute', inset: 0, animation: 'fadeIn 0.35s ease-out both' }}>
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
         height="100%"
         preserveAspectRatio="xMidYMid meet"
+        style={{ cursor: draggingId ? 'grabbing' : 'default' }}
+        onPointerMove={handleSvgPointerMove}
+        onPointerUp={handleSvgPointerUp}
       >
         <defs>
-          {/* Crosshatch fill pattern */}
           <pattern id="xhatch" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
             <path d="M 0 0 L 16 16" stroke="rgba(255,255,255,0.022)" strokeWidth="0.5" fill="none" />
             <path d="M 16 0 L 0 16" stroke="rgba(255,255,255,0.022)" strokeWidth="0.5" fill="none" />
           </pattern>
-
-          {/* Soft hover glow */}
           <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
             <feMerge>
@@ -203,8 +264,6 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-
-          {/* Hero ambient glow */}
           <filter id="heroAmbient" x="-60%" y="-60%" width="220%" height="220%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="blur" />
             <feMerge>
@@ -214,41 +273,29 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           </filter>
         </defs>
 
-        {/* ── Background texture ──────────────────────────────── */}
+        {/* Background */}
         <rect width={W} height={H} fill="url(#xhatch)" />
 
-        {/* ── Orbital ring guides ─────────────────────────────── */}
-        <circle
-          cx={CX} cy={CY} r={R1}
-          fill="none"
-          stroke="rgba(255,255,255,0.055)"
-          strokeWidth="1"
-          strokeDasharray="2 10"
-        />
-        <circle
-          cx={CX} cy={CY} r={R2}
-          fill="none"
-          stroke="rgba(255,255,255,0.03)"
-          strokeWidth="1"
-          strokeDasharray="2 10"
-        />
+        {/* Orbital ring guides */}
+        <circle cx={CX} cy={CY} r={R1} fill="none" stroke="rgba(255,255,255,0.055)" strokeWidth="1" strokeDasharray="2 10" />
+        <circle cx={CX} cy={CY} r={R2} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" strokeDasharray="2 10" />
 
-        {/* ── Connection lines ────────────────────────────────── */}
+        {/* Connection lines — use live positions so lines follow dragged nodes */}
         {satellites.map((node, i) => {
-          const pos = positions[node.id];
-          if (!pos) return null;
+          const heroPos = hero ? getPos(hero.id) : { x: CX, y: CY };
+          const nodePos = getPos(node.id);
           const active = hoveredId === node.id || selectedNodeId === node.id;
           return (
             <line
               key={`line-${node.id}`}
-              x1={CX} y1={CY}
-              x2={pos.x} y2={pos.y}
+              x1={heroPos.x} y1={heroPos.y}
+              x2={nodePos.x} y2={nodePos.y}
               stroke="#BF4723"
               strokeWidth={active ? 1.5 : 0.8}
               strokeDasharray="4 9"
               opacity={active ? 0.55 : 0.22}
               style={{
-                transition: 'opacity 0.2s ease, stroke-width 0.2s ease',
+                transition: 'opacity 0.2s ease',
                 animationName: 'lineAppear',
                 animationDuration: '0.5s',
                 animationTimingFunction: 'ease-out',
@@ -259,57 +306,52 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           );
         })}
 
-        {/* ── Hero node ───────────────────────────────────────── */}
-        {hero && heroPos && (
+        {/* Hero node */}
+        {hero && (
           <HeroNode
             node={hero}
-            pos={heroPos}
+            pos={getPos(hero.id)}
             isActive={selectedNodeId === hero.id || hoveredId === hero.id}
-            onClickNode={onNodeClick}
+            isDragging={draggingId === hero.id}
+            onPointerDown={e => handleNodePointerDown(e, hero)}
+            onClickNode={handleNodeClick}
             onHover={setHoveredId}
           />
         )}
 
-        {/* ── Satellite nodes ─────────────────────────────────── */}
+        {/* Satellite nodes */}
         {satellites.map((node, i) => {
-          const pos = positions[node.id];
-          if (!pos) return null;
+          const pos = getPos(node.id);
           const isHov = hoveredId === node.id;
           const isSel = selectedNodeId === node.id;
+          const isDrag = draggingId === node.id;
           const r = node.ring === 1 ? SAT1_R : SAT2_R;
-          const delay = 200 + i * 100;
 
           return (
-            /* Outer <g>: SVG positioning — no CSS animation */
             <g key={node.id} transform={`translate(${pos.x} ${pos.y})`}>
-              {/* Inner <g>: CSS scale animation only */}
               <g
                 className="node-group"
-                style={{ cursor: 'pointer', ...animStyle(delay) }}
-                onClick={() => onNodeClick(node)}
+                style={{
+                  cursor: isDrag ? 'grabbing' : 'grab',
+                  ...animStyle(200 + i * 100),
+                }}
+                onPointerDown={e => handleNodePointerDown(e, node)}
+                onClick={() => handleNodeClick(node)}
                 onMouseEnter={() => setHoveredId(node.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
-                {/* Hover / selected halo */}
+                <title>Click to view details · Drag to move</title>
                 {(isSel || isHov) && (
-                  <circle
-                    r={r + 13}
-                    fill="none"
-                    stroke="#BF4723"
-                    strokeWidth="1"
-                    opacity={isSel ? 0.35 : 0.2}
-                  />
+                  <circle r={r + 13} fill="none" stroke="#BF4723" strokeWidth="1" opacity={isSel ? 0.35 : 0.2} />
                 )}
-                {/* Main satellite circle */}
                 <circle
                   r={r}
-                  fill={isSel ? 'rgba(191,71,35,0.18)' : '#161616'}
+                  fill={isSel ? 'rgba(191,71,35,0.18)' : isDrag ? 'rgba(191,71,35,0.12)' : '#161616'}
                   stroke="#BF4723"
-                  strokeWidth={isSel ? 1.5 : node.ring === 1 ? 1.2 : 1}
+                  strokeWidth={isSel || isDrag ? 1.5 : node.ring === 1 ? 1.2 : 1}
                   filter={isHov ? 'url(#softGlow)' : undefined}
-                  style={{ transition: 'fill 0.2s ease' }}
+                  style={{ transition: 'fill 0.15s ease' }}
                 />
-                {/* Platform abbreviation */}
                 <text
                   textAnchor="middle"
                   dominantBaseline="middle"
@@ -320,7 +362,6 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
                 >
                   {abbrev(node.platform)}
                 </text>
-                {/* Node title */}
                 <text
                   y={r + 17}
                   textAnchor="middle"
@@ -330,7 +371,6 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
                 >
                   {trunc(node.title, 14)}
                 </text>
-                {/* Format label */}
                 <text
                   y={r + 29}
                   textAnchor="middle"
@@ -346,10 +386,9 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           );
         })}
 
-        {/* ── Canvas label ─────────────────────────────────────── */}
+        {/* Canvas label */}
         <text
-          x={W - 16}
-          y={H - 14}
+          x={W - 16} y={H - 14}
           textAnchor="end"
           fill="#2A2A2A"
           fontSize="9"

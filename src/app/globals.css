@@ -136,3 +136,12 @@ body {
   transform-box: fill-box;
   transform-origin: center;
 }
+
+/* Hide scrollbar while keeping scroll functionality */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

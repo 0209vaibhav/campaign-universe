@@ -27,6 +27,10 @@ export default function Home() {
     setAddNodeOpen(false);
   }
 
+  function handleDeleteNode(id: string) {
+    setCampaign(prev => ({ ...prev, nodes: prev.nodes.filter(n => n.id !== id) }));
+  }
+
   return (
     <main
       style={{
@@ -94,6 +98,7 @@ export default function Home() {
           <NodeDetailPanel
             node={selectedNode}
             onClose={() => setSelectedNode(null)}
+            onDelete={handleDeleteNode}
           />
         )}
       </div>

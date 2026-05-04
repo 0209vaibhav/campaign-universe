@@ -5,22 +5,25 @@ import type { CampaignNode } from '@/lib/types';
 interface Props {
   node: CampaignNode;
   onClose: () => void;
+  onDelete: (id: string) => void;
 }
 
-export default function NodeDetailPanel({ node, onClose }: Props) {
+export default function NodeDetailPanel({ node, onClose, onDelete }: Props) {
   return (
     <div
-      className="absolute bottom-6 right-6"
       style={{
+        position: 'absolute',
+        bottom: '24px',
+        right: '24px',
         width: '288px',
         animation: 'slideUp 0.28s ease-out both',
+        zIndex: 20,
       }}
     >
       <div
         style={{
           background: '#161616',
           border: '1px solid #1E1E1E',
-          /* no border-radius — brief non-negotiable */
         }}
       >
         {/* Header */}
@@ -97,7 +100,7 @@ export default function NodeDetailPanel({ node, onClose }: Props) {
         </div>
 
         {/* Description */}
-        <div style={{ padding: '12px 14px 14px' }}>
+        <div style={{ padding: '12px 14px 10px' }}>
           <p
             className="font-body"
             style={{
@@ -110,6 +113,39 @@ export default function NodeDetailPanel({ node, onClose }: Props) {
             {node.description}
           </p>
         </div>
+
+        {/* Delete — only for satellite nodes */}
+        {node.type === 'satellite' && (
+          <div style={{ padding: '0 14px 14px' }}>
+            <button
+              onClick={() => { onDelete(node.id); onClose(); }}
+              style={{
+                width: '100%',
+                background: 'transparent',
+                border: '1px solid #2A2A2A',
+                borderRadius: 0,
+                color: '#6B6B6B',
+                fontFamily: "'Simpson', sans-serif",
+                textTransform: 'uppercase',
+                letterSpacing: '0.18em',
+                fontSize: '8px',
+                padding: '9px',
+                cursor: 'pointer',
+                transition: 'border-color 0.2s, color 0.2s',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = '#BF4723';
+                (e.currentTarget as HTMLButtonElement).style.color = '#BF4723';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = '#2A2A2A';
+                (e.currentTarget as HTMLButtonElement).style.color = '#6B6B6B';
+              }}
+            >
+              Remove Node
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

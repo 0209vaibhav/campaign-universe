@@ -79,7 +79,7 @@ export default function InputPanel({ campaign, onCampaignChange, onAddNode }: Pr
       </div>
 
       {/* ── Scrollable body ─────────────────────────────────── */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+      <div className="no-scrollbar" style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
         {/* ── Input form ──────────────────────────────────── */}
         <form onSubmit={handleBuild} style={{ marginBottom: '0' }}>
           <div style={{ marginBottom: '14px' }}>
