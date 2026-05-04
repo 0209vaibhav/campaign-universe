@@ -289,7 +289,12 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
   const satellites = campaign.nodes.filter(n => n.type === 'satellite');
 
   return (
-    <div style={{ position: 'absolute', inset: 0, animation: 'fadeIn 0.35s ease-out both' }}>
+    <div style={{
+      position: 'absolute', inset: 0, animation: 'fadeIn 0.35s ease-out both',
+      backgroundColor: '#111',
+      backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.022) 0.5px, transparent 0.5px), linear-gradient(-45deg, rgba(255,255,255,0.022) 0.5px, transparent 0.5px)',
+      backgroundSize: '16px 16px',
+    }}>
       <svg
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
@@ -301,10 +306,6 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
         onPointerUp={handleSvgPointerUp}
       >
         <defs>
-          <pattern id="xhatch" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
-            <path d="M 0 0 L 16 16" stroke="rgba(255,255,255,0.022)" strokeWidth="0.5" fill="none" />
-            <path d="M 16 0 L 0 16" stroke="rgba(255,255,255,0.022)" strokeWidth="0.5" fill="none" />
-          </pattern>
           <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
             <feMerge>
@@ -321,8 +322,7 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           </filter>
         </defs>
 
-        {/* Background */}
-        <rect width={W} height={H} fill="url(#xhatch)" />
+        {/* Background handled by wrapper div CSS */}
 
         {/* Decorative depth rings */}
         <circle cx={CX} cy={CY} r={70}  fill="none" stroke="rgba(255,255,255,0.018)" strokeWidth="1" strokeDasharray="2 14" />
@@ -423,10 +423,6 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
                     filter={isHov && !isSel ? 'url(#softGlow)' : undefined}
                     style={{ transition: 'fill 0.2s ease, stroke-width 0.2s ease' }}
                   />
-                  {/* Ring 1 center dot — marks launch-tier nodes */}
-                  {node.ring === 1 && !isSel && (
-                    <circle r={2.5} fill="#BF4723" opacity="0.65" />
-                  )}
                 <text
                   textAnchor="middle"
                   dominantBaseline="middle"
@@ -481,8 +477,8 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
           );
         })}
 
-        {/* Legend — bottom-left */}
-        <g transform={`translate(20, ${H - 54})`}>
+        {/* Legend — top-left */}
+        <g transform="translate(20, 20)">
           <text fill="#2A2A2A" fontSize="7" letterSpacing="2" style={{ fontFamily: "'Simpson', sans-serif" }}>
             ORBIT RINGS
           </text>
