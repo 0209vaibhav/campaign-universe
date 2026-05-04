@@ -143,25 +143,44 @@ function HeroNode({ node, pos, isActive, isDragging, onPointerDown, onClickNode,
           style={{ transition: 'filter 0.2s ease' }}
         />
         <polygon points="-9,-12 18,0 -9,12" fill="rgba(255,255,255,0.88)" />
-        <text
-          y={HERO_R + 20}
-          textAnchor="middle"
-          fill="#F2EFE8"
-          fontSize="11"
-          style={{ fontFamily: "'ABC Camera Medium', sans-serif" }}
-        >
-          {trunc(node.title, 18)}
-        </text>
-        <text
-          y={HERO_R + 33}
-          textAnchor="middle"
-          fill="#9A958C"
-          fontSize="8"
-          letterSpacing="1.8"
-          style={{ fontFamily: "'Simpson', sans-serif" }}
-        >
-          {node.format.toUpperCase()}
-        </text>
+        {(() => {
+          const [l1, l2] = splitTitle(node.title);
+          const formatY = l2 ? HERO_R + 46 : HERO_R + 33;
+          return (
+            <>
+              <text
+                y={HERO_R + 20}
+                textAnchor="middle"
+                fill="#F2EFE8"
+                fontSize="11"
+                style={{ fontFamily: "'ABC Camera Medium', sans-serif" }}
+              >
+                {l1}
+              </text>
+              {l2 && (
+                <text
+                  y={HERO_R + 33}
+                  textAnchor="middle"
+                  fill="#F2EFE8"
+                  fontSize="11"
+                  style={{ fontFamily: "'ABC Camera Medium', sans-serif" }}
+                >
+                  {l2}
+                </text>
+              )}
+              <text
+                y={formatY}
+                textAnchor="middle"
+                fill="#9A958C"
+                fontSize="8"
+                letterSpacing="1.8"
+                style={{ fontFamily: "'Simpson', sans-serif" }}
+              >
+                {node.format.toUpperCase()}
+              </text>
+            </>
+          );
+        })()}
       </g>
     </g>
   );

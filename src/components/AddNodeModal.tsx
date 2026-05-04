@@ -32,6 +32,31 @@ const inputStyle: React.CSSProperties = {
   outline: 'none',
 };
 
+// Wraps a <select> to suppress browser chrome and add a custom chevron
+const selectWrapStyle: React.CSSProperties = {
+  position: 'relative',
+  width: '100%',
+};
+
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  cursor: 'pointer',
+  paddingRight: '28px',
+};
+
+const chevronStyle: React.CSSProperties = {
+  position: 'absolute',
+  right: '10px',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  pointerEvents: 'none',
+  color: '#6B6B6B',
+  fontSize: '10px',
+  lineHeight: 1,
+};
+
 const labelStyle: React.CSSProperties = {
   fontFamily: "'Simpson', sans-serif",
   textTransform: 'uppercase',
@@ -146,26 +171,32 @@ export default function AddNodeModal({ onAdd, onClose }: Props) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <label style={labelStyle}>Platform</label>
-                <select
-                  style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}
-                  value={platform}
-                  onChange={e => setPlatform(e.target.value)}
-                >
-                  {PLATFORMS.map(p => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
+                <div style={selectWrapStyle}>
+                  <select
+                    style={selectStyle}
+                    value={platform}
+                    onChange={e => setPlatform(e.target.value)}
+                  >
+                    {PLATFORMS.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                  <span style={chevronStyle}>▾</span>
+                </div>
               </div>
               <div>
                 <label style={labelStyle}>Orbit</label>
-                <select
-                  style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}
-                  value={ring}
-                  onChange={e => setRing(Number(e.target.value) as Ring)}
-                >
-                  <option value={1}>Inner — Ring 1</option>
-                  <option value={2}>Outer — Ring 2</option>
-                </select>
+                <div style={selectWrapStyle}>
+                  <select
+                    style={selectStyle}
+                    value={ring}
+                    onChange={e => setRing(Number(e.target.value) as Ring)}
+                  >
+                    <option value={1}>Inner — Ring 1</option>
+                    <option value={2}>Outer — Ring 2</option>
+                  </select>
+                  <span style={chevronStyle}>▾</span>
+                </div>
               </div>
             </div>
 

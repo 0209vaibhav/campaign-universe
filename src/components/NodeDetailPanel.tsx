@@ -83,7 +83,7 @@ export default function NodeDetailPanel({ node, onClose, onDelete }: Props) {
           {[
             { label: 'Format', value: node.format },
             { label: 'Duration', value: node.duration },
-            { label: 'Orbit', value: `Ring ${node.ring}` },
+            { label: node.type === 'hero' ? 'Type' : 'Orbit', value: node.type === 'hero' ? 'Hero Asset' : `Ring ${node.ring}` },
           ].map(({ label, value }) => (
             <div key={label} style={{ background: '#161616', padding: '10px 12px' }}>
               <div className="label" style={{ fontSize: '8px', marginBottom: '4px' }}>
