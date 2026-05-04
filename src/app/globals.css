@@ -1,26 +1,138 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* -----------------------------
+   Design tokens
+------------------------------ */
+
+@theme {
+  --color-base: #0E0E0E;
+  --color-card: #161616;
+  --color-cream: #F2EFE8;
+  --color-muted: #9A958C;
+  --color-faint: #6B6B6B;
+  --color-rust: #BF4723;
+  --color-sage: #7C876F;
+  --color-accent-blue: #1E5C8C;
+  --color-border: #1E1E1E;
+
+  --font-display: 'ABC Camera Medium', sans-serif;
+  --font-body: 'ABC Camera', sans-serif;
+  --font-label: 'Simpson', sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* -----------------------------
+   Fonts
+------------------------------ */
+
+@font-face {
+  font-family: 'ABC Camera';
+  src: url('/fonts/ABCCameraPlain-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@font-face {
+  font-family: 'ABC Camera Medium';
+  src: url('/fonts/ABCCameraPlain-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Simpson';
+  src: url('/fonts/CWSimpsonCW-Medium.otf') format('opentype');
+  font-display: swap;
+}
+
+/* -----------------------------
+   Base
+------------------------------ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #0E0E0E;
+  color: #F2EFE8;
+  font-family: 'ABC Camera', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* -----------------------------
+   Utilities
+------------------------------ */
+
+.font-display { font-family: 'ABC Camera Medium', sans-serif; }
+.font-body    { font-family: 'ABC Camera', sans-serif; }
+.font-label   { font-family: 'Simpson', sans-serif; }
+
+.label {
+  font-family: 'Simpson', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 10px;
+  color: #9A958C;
+}
+
+/* Subtle diagonal crosshatch overlay */
+.crosshatch {
+  background-image:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255,255,255,0.025) 0px,
+      rgba(255,255,255,0.025) 1px,
+      transparent 1px,
+      transparent 50%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,0.025) 0px,
+      rgba(255,255,255,0.025) 1px,
+      transparent 1px,
+      transparent 50%
+    );
+  background-size: 12px 12px;
+}
+
+/* -----------------------------
+   Animations
+------------------------------ */
+
+@keyframes nodeAppear {
+  from { opacity: 0; transform: scale(0.35); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes lineAppear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulseRing {
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 0.45; }
+}
+
+/* SVG node animation: needs fill-box for transform-origin to work in SVG */
+.node-group {
+  transform-box: fill-box;
+  transform-origin: center;
 }
