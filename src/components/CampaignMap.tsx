@@ -417,15 +417,20 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
                   <circle
                     r={r}
                     fill={isSel ? 'rgba(191,71,35,0.2)' : isDrag ? 'rgba(191,71,35,0.12)' : '#161616'}
-                    stroke="#BF4723"
+                    stroke={isSel || isDrag ? '#BF4723' : node.ring === 1 ? '#BF4723' : 'rgba(191,71,35,0.55)'}
                     strokeWidth={isSel ? 2.5 : isDrag ? 1.5 : node.ring === 1 ? 1.2 : 1}
+                    strokeDasharray={!isSel && !isDrag && node.ring === 2 ? '2 3' : undefined}
                     filter={isHov && !isSel ? 'url(#softGlow)' : undefined}
                     style={{ transition: 'fill 0.2s ease, stroke-width 0.2s ease' }}
                   />
+                  {/* Ring 1 center dot — marks launch-tier nodes */}
+                  {node.ring === 1 && !isSel && (
+                    <circle r={2.5} fill="#BF4723" opacity="0.65" />
+                  )}
                 <text
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fill={isSel ? '#F2EFE8' : '#BF4723'}
+                  fill={isSel ? '#F2EFE8' : node.ring === 1 ? '#BF4723' : 'rgba(191,71,35,0.6)'}
                   fontSize={node.ring === 1 ? 8 : 7}
                   letterSpacing="1"
                   style={{ fontFamily: "'Simpson', sans-serif" }}
@@ -475,6 +480,26 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
             </g>
           );
         })}
+
+        {/* Legend — bottom-left */}
+        <g transform={`translate(20, ${H - 54})`}>
+          <text fill="#2A2A2A" fontSize="7" letterSpacing="2" style={{ fontFamily: "'Simpson', sans-serif" }}>
+            ORBIT RINGS
+          </text>
+          <g transform="translate(0, 16)">
+            <circle r={6} fill="#161616" stroke="#BF4723" strokeWidth="1.2" />
+            <circle r={2.5} fill="#BF4723" opacity="0.65" />
+            <text x={14} dominantBaseline="middle" fill="#2A2A2A" fontSize="7.5" letterSpacing="1.5" style={{ fontFamily: "'Simpson', sans-serif" }}>
+              RING 1 — LAUNCH
+            </text>
+          </g>
+          <g transform="translate(0, 32)">
+            <circle r={5} fill="#161616" stroke="rgba(191,71,35,0.55)" strokeWidth="1" strokeDasharray="2 3" />
+            <text x={14} dominantBaseline="middle" fill="#2A2A2A" fontSize="7.5" letterSpacing="1.5" style={{ fontFamily: "'Simpson', sans-serif" }}>
+              RING 2 — EXTEND
+            </text>
+          </g>
+        </g>
 
         {/* Canvas label */}
         <text
