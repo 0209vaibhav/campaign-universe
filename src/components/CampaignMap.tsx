@@ -481,17 +481,17 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
         })}
 
         {/* Canvas label */}
-        <text
-          x={16} y={H - 14}
-          textAnchor="start"
-          fill="#5A5A5A"
-          fontSize="9"
-          letterSpacing="2"
-          style={{ fontFamily: "'Simpson', sans-serif" }}
-        >
-          {satellites.length} EXTENSIONS
-        </text>
       </svg>
+
+      {/* Extensions count — HTML overlay, flush to container bottom-left */}
+      <div style={{
+        position: 'absolute', bottom: 16, left: 16,
+        pointerEvents: 'none',
+      }}>
+        <span style={{ fontFamily: "'Simpson', sans-serif", fontSize: 9, letterSpacing: 2, color: '#5A5A5A' }}>
+          {satellites.length} EXTENSIONS
+        </span>
+      </div>
 
       {/* Legend — HTML overlay, always flush to container top-right */}
       <div style={{
