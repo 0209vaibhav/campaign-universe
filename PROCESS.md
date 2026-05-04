@@ -8,7 +8,7 @@ Ring 1 holds content *derived directly from the hero film* — cuts, edits, plat
 
 ## How I Used Claude
 
-I broke the build into three sequential phases: core functionality first, brand fidelity second, visual polish third. Each phase had an explicit spec before any code was written — component structure, data shape, interaction model. I gave Claude the DESIGN.md constraints directly rather than describing the aesthetic in vague terms. Prompts referenced specific hex values, font names, and behaviour rules from the brief. Vague prompts produce vague code.
+I broke the build into three sequential phases: core functionality first, brand fidelity second, visual polish third. Each phase had an explicit spec before any code was written — component structure, data shape, interaction model. I gave Claude the brief's non-negotiables directly rather than describing the aesthetic in vague terms. Prompts referenced specific hex values, font names, and behaviour rules from the brief — not the DESIGN.md in the repo, which describes a different Burn Studio product and contradicts the brief on rounded corners, typography, and overall feel. Vague prompts produce vague code.
 
 ## Decisions I Made
 
