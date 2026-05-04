@@ -14,7 +14,7 @@ interface Props {
 const inputStyle: React.CSSProperties = {
   width: '100%',
   background: '#0E0E0E',
-  border: '1px solid #222222',
+  border: '1px solid #333',
   borderRadius: 0,
   color: '#F2EFE8',
   fontFamily: "'ABC Camera', sans-serif",
@@ -27,7 +27,7 @@ const inputStyle: React.CSSProperties = {
 
 const dividerStyle: React.CSSProperties = {
   height: '1px',
-  background: '#1A1A1A',
+  background: '#333',
   margin: '0 -20px',
 };
 
@@ -47,7 +47,7 @@ export default function InputPanel({ campaign, onCampaignChange, onAddNode }: Pr
         width: '296px',
         flexShrink: 0,
         height: '100%',
-        borderRight: '1px solid #1A1A1A',
+        borderRight: '1px solid #333',
         background: '#0E0E0E',
         display: 'flex',
         flexDirection: 'column',
@@ -56,7 +56,7 @@ export default function InputPanel({ campaign, onCampaignChange, onAddNode }: Pr
       className="crosshatch"
     >
       {/* ── Logo ────────────────────────────────────────────── */}
-      <div style={{ padding: '20px 20px 18px', borderBottom: '1px solid #1A1A1A' }}>
+      <div style={{ padding: '20px 20px 18px', borderBottom: '1px solid #333' }}>
         <Image
           src="/Hero Logo - Black.png"
           alt="Burn Studio"
@@ -259,7 +259,7 @@ export default function InputPanel({ campaign, onCampaignChange, onAddNode }: Pr
       </div>
 
       {/* ── Footer: Add Node ────────────────────────────────── */}
-      <div style={{ borderTop: '1px solid #1A1A1A', padding: '14px 20px' }}>
+      <div style={{ borderTop: '1px solid #333', padding: '14px 20px' }}>
         <button
           onClick={onAddNode}
           style={{
