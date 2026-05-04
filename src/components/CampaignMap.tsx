@@ -204,6 +204,7 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
     id: string;
     ox: number; oy: number;
     mx: number; my: number;
+    orbitRadius: number | null; // null = free drag (hero node)
   } | null>(null);
   const wasDragRef = useRef(false);
 
@@ -241,7 +242,10 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
     const pt = toSvgCoords(e.clientX, e.clientY);
     if (!pt) return;
     const pos = getPos(node.id);
-    dragRef.current = { id: node.id, ox: pos.x, oy: pos.y, mx: pt.x, my: pt.y };
+    const orbitRadius = node.type === 'satellite'
+      ? (node.ring === 1 ? R1 : R2)
+      : null; // hero is free to drag
+    dragRef.current = { id: node.id, ox: pos.x, oy: pos.y, mx: pt.x, my: pt.y, orbitRadius };
   }
 
   function handleSvgPointerMove(e: React.PointerEvent) {
@@ -255,8 +259,17 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
       setDraggingId(dragRef.current.id);
     }
     if (!wasDragRef.current) return;
-    const { id, ox, oy } = dragRef.current;
-    setManualPositions(prev => ({ ...prev, [id]: { x: ox + dx, y: oy + dy } }));
+    const { id, ox, oy, orbitRadius } = dragRef.current;
+    if (orbitRadius !== null) {
+      // Constrain satellite to its ring — project pointer angle onto fixed radius
+      const angle = Math.atan2(pt.y - CY, pt.x - CX);
+      setManualPositions(prev => ({ ...prev, [id]: {
+        x: CX + Math.cos(angle) * orbitRadius,
+        y: CY + Math.sin(angle) * orbitRadius,
+      } }));
+    } else {
+      setManualPositions(prev => ({ ...prev, [id]: { x: ox + dx, y: oy + dy } }));
+    }
   }
 
   function handleSvgPointerUp() {
@@ -311,13 +324,14 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
         {/* Background */}
         <rect width={W} height={H} fill="url(#xhatch)" />
 
-        {/* Orbital ring guides — innermost to outermost, fading out */}
+        {/* Decorative depth rings */}
         <circle cx={CX} cy={CY} r={70}  fill="none" stroke="rgba(255,255,255,0.018)" strokeWidth="1" strokeDasharray="2 14" />
-        <circle cx={CX} cy={CY} r={R1}  fill="none" stroke="rgba(255,255,255,0.05)"  strokeWidth="1" strokeDasharray="2 10" />
-        <circle cx={CX} cy={CY} r={215} fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="1" strokeDasharray="2 12" />
-        <circle cx={CX} cy={CY} r={R2}  fill="none" stroke="rgba(255,255,255,0.035)" strokeWidth="1" strokeDasharray="2 10" />
-        <circle cx={CX} cy={CY} r={355} fill="none" stroke="rgba(255,255,255,0.015)" strokeWidth="1" strokeDasharray="2 16" />
-        <circle cx={CX} cy={CY} r={420} fill="none" stroke="rgba(255,255,255,0.008)" strokeWidth="1" strokeDasharray="2 20" />
+        <circle cx={CX} cy={CY} r={215} fill="none" stroke="rgba(255,255,255,0.02)"  strokeWidth="1" strokeDasharray="2 12" />
+        <circle cx={CX} cy={CY} r={355} fill="none" stroke="rgba(255,255,255,0.012)" strokeWidth="1" strokeDasharray="2 16" />
+        <circle cx={CX} cy={CY} r={420} fill="none" stroke="rgba(255,255,255,0.006)" strokeWidth="1" strokeDasharray="2 20" />
+        {/* Orbit track rings — Ring 1 and Ring 2 */}
+        <circle cx={CX} cy={CY} r={R1}  fill="none" stroke="rgba(191,71,35,0.45)"   strokeWidth="1.2" strokeDasharray="3 7" />
+        <circle cx={CX} cy={CY} r={R2}  fill="none" stroke="rgba(191,71,35,0.30)"   strokeWidth="1" strokeDasharray="3 9" />
 
         {/* Connection lines — use live positions so lines follow dragged nodes */}
         {satellites.map((node, i) => {
