@@ -62,7 +62,8 @@ export default function InputPanel({ campaign, onCampaignChange, onAddNode }: Pr
           alt="Burn Studio"
           width={120}
           height={28}
-          style={{ filter: 'invert(1)', opacity: 0.9 }}
+          style={{ filter: 'invert(1)', opacity: 0.9, width: 120, height: 'auto' }}
+          priority
           unoptimized
         />
         <p
