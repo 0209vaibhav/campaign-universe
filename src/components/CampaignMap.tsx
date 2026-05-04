@@ -96,29 +96,25 @@ function animStyle(delay: number): React.CSSProperties {
 
 interface HeroNodeProps {
   node: CampaignNode;
-  pos: { x: number; y: number };
   isActive: boolean;
-  isDragging: boolean;
-  onPointerDown: (e: React.PointerEvent) => void;
   onClickNode: (n: CampaignNode) => void;
   onHover: (id: string | null) => void;
 }
 
-function HeroNode({ node, pos, isActive, isDragging, onPointerDown, onClickNode, onHover }: HeroNodeProps) {
+function HeroNode({ node, isActive, onClickNode, onHover }: HeroNodeProps) {
   return (
-    <g transform={`translate(${pos.x} ${pos.y})`}>
+    <g transform={`translate(${CX} ${CY})`}>
       <g
         className="node-group"
         style={{
-          cursor: isDragging ? 'grabbing' : 'grab',
+          cursor: 'pointer',
           ...animStyle(0),
         }}
-        onPointerDown={onPointerDown}
         onClick={() => onClickNode(node)}
         onMouseEnter={() => onHover(node.id)}
         onMouseLeave={() => onHover(null)}
       >
-        <title>Click to view details · Drag to move</title>
+        <title>Click to view details</title>
         <circle
           r={HERO_R + 6}
           fill="#BF4723"
@@ -338,7 +334,7 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
 
         {/* Connection lines — use live positions so lines follow dragged nodes */}
         {satellites.map((node, i) => {
-          const heroPos = hero ? getPos(hero.id) : { x: CX, y: CY };
+          const heroPos = { x: CX, y: CY };
           const nodePos = getPos(node.id);
           const active = hoveredId === node.id || selectedNodeId === node.id;
           const anySelected = selectedNodeId !== null;
@@ -368,10 +364,7 @@ export default function CampaignMap({ campaign, selectedNodeId, onNodeClick }: P
         {hero && (
           <HeroNode
             node={hero}
-            pos={getPos(hero.id)}
             isActive={selectedNodeId === hero.id || hoveredId === hero.id}
-            isDragging={draggingId === hero.id}
-            onPointerDown={e => handleNodePointerDown(e, hero)}
             onClickNode={handleNodeClick}
             onHover={setHoveredId}
           />
